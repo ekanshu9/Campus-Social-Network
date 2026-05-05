@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar/Navbar";
 import { toast } from "react-hot-toast";
 import Cookies from "js-cookie";
 
-const ChatPage = () => {
+const ChatContent = () => {
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -248,9 +248,8 @@ const ChatPage = () => {
                   <div
                     key={conv.partnerId}
                     onClick={() => setActivePartner(conv)}
-                    className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-800 ${
-                      activePartner?.partnerId === conv.partnerId ? "bg-gray-800" : "hover:bg-gray-800/50"
-                    }`}
+                    className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-800 ${activePartner?.partnerId === conv.partnerId ? "bg-gray-800" : "hover:bg-gray-800/50"
+                      }`}
                   >
                     <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">
                       {conv.partnerName?.charAt(0).toUpperCase()}
@@ -290,11 +289,10 @@ const ChatPage = () => {
                   return (
                     <div key={msg._id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[70%] px-4 py-2 rounded-2xl ${
-                          isMine
+                        className={`max-w-[70%] px-4 py-2 rounded-2xl ${isMine
                             ? "bg-blue-600 text-white rounded-br-sm"
                             : "bg-gray-800 text-gray-200 rounded-bl-sm"
-                        }`}
+                          }`}
                       >
                         <p className="text-sm">{msg.message}</p>
                         <p className="text-[10px] mt-1 opacity-60">
@@ -338,4 +336,15 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+// Wrap with Suspense to fix useSearchParams() build error
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl">Loading Chat...</p>
+      </div>
+    }>
+      <ChatContent />
+    </Suspense>
+  );
+}
